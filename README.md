@@ -11,7 +11,7 @@ Cons:
 
 Here's what it looks like with an RTX2070 super:
 
-![cool img](img/capture.png)
+<div style="text-align:center"><img src="img/capture.png" /></div>
 
 ## Features
 - Customizable size/location, update frequency...
