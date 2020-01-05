@@ -47,11 +47,13 @@ def place_root(root):
     # print(ws, hs)
     # x = (ws/2) - (w/2)
     # y = (hs/2) - (h/2)
-    
+    second_height = int(settings_dict['second_screen_height'])
+    if second_height == 0:
+        second_height = hs
     root.geometry('%dx%d+%d+%d' % (w, 
                 h, 
                 int(settings_dict['main_screen_width'])+int(settings_dict['second_screen_width'])-w, 
-                int(settings_dict['second_screen_height'])-h-40))
+                second_height-h-40))
 
 def get_lbl_kwargs(bold=False, anchor=None, fsize=10):
     basic_kwargs = {
@@ -75,7 +77,7 @@ class Sidelight:
         self.root.deiconify()
         self.root.attributes("-topmost", True)
         self.root.configure(background='black')
-        self.root.attributes('-alpha', 0.6)
+        self.root.attributes('-alpha', float(settings_dict['alpha']))
         self.root.overrideredirect(True)
         self.root.protocol('WM_DELETE_WINDOW', self.close)
         place_root(self.root)
