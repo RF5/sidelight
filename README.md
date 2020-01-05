@@ -1,9 +1,11 @@
 # Sidelight GPU monitor
 TL;DR a lightweigth live GPU monitor that sits in the corner of your screen (or second screen).
+
 Pros:
 - Very small
 - Super lightweight
-- Easily customizable (for those who know a little python)
+- Easily customizable (even more so for those who know a little python)
+
 Cons:
 - Requires manual installation and python
 
