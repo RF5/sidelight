@@ -17,6 +17,7 @@ Here's what it looks like with an RTX2070 super:
 - Customizable size/location, update frequency...
 - Works for any (reasonably new) Nvidia GPU
 - Statistics are color graded from a deep blue when the resource is hardly being used, to a bright red when the resource is being fully used.
+- Works great/best with multiple monitors.
 
 ## Requirements
 - Windows 10
