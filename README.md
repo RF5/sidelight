@@ -25,7 +25,7 @@ Here's what it looks like with an RTX2070 super:
 - Python 3.6+ with matplotlib (or Anaconda)
 
 ## Installation
-1. Download the latest release from the 'releases' tab in this repo
+1. Download the latest `sidelightGPU.zip` release from the 'releases' tab in this repo
 2. Extact the zip file to wherever you want on your computer
 3. Install python 3.6+ with matplotlib.
    - If python is not installed, install it from https://www.python.org/downloads/ (3.6+, usually go for the newest one).
