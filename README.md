@@ -9,6 +9,13 @@ Cons:
 
 Here's what it looks like with an RTX2070 super:
 
+![cool img](img/capture.png)
+
+## Features
+- Customizable size/location, update frequency...
+- Works for any (reasonably new) Nvidia GPU
+- Statistics are color graded from a deep blue when the resource is hardly being used, to a bright red when the resource is being fully used.
+
 ## Requirements
 - Windows 10
 - Nvidia GPU with Nvidia GPU driver installed
@@ -28,7 +35,7 @@ Here's what it looks like with an RTX2070 super:
 
 That's it :). 
 
-### Making sidelight automatically start when the computer starts
+## Making sidelight automatically start when the computer starts
 Finding and clicking `sidelight.bat` each time you start your PC can be quite annoying, so to automatically run sidelight whever you login to your PC, do this:
 1. In the start menu, search "schedule tasks", and click on the Schedule tasks result.
 2. In the right panel, hit `create basic task`, enter a name and description of your choice.
