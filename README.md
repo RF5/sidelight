@@ -33,7 +33,7 @@ Here's what it looks like with an RTX2070 super:
    - OPTIONAL: if you already have [Anaconda](https://www.anaconda.com/distribution), you can skip separately installing python and just uncomment the first line in the bash script `sidelight.bat` (by removing the two `:: ` characters) once you have unzipped.
 4. Customize installation
     - Open `settings.config` in your favorite text editor (notepad, whatever)
-    - Adjust the first 4 lines to be your primary (and optionally secondary) screen size. Each line has a comment to indicate what it does, so feel free to mess around and customize things how you like, but to get things up and running you only need to adjust the first 4 settings to be your primary and secnodary screen size. Note that primary screen is the one windows identifies as screen 1 in your display settings. PS: Adjusting this also allows you to place the sidelight widget anywhere on the screen if you are careful enough.
+    - Adjust the first 4 lines to be your primary (and optionally secondary) screen size. Each line has a comment to indicate what it does, so feel free to mess around and customize things how you like, but to get things up and running you only need to adjust the first 4 settings to be your primary and secondary screen size. Note that primary screen is the one windows identifies as screen 1 in your display settings. PS: Adjusting this also allows you to place the sidelight widget anywhere on the screen if you are careful enough.
  5. Test it out! Try double clicking `sidelight.bat` to start sidelight. Note it may take a couple of seconds for the statistics to first update.
 
 That's it :). 
