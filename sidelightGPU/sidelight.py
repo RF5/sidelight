@@ -22,20 +22,23 @@ with open(Path(sidelight_dir)/'settings.config', 'r') as file:
 update_freq_s = int(settings_dict['update_freq_s'])#5
 bring_to_front_delay = int(settings_dict['bring_to_front_delay'])#15
 
-
-smi_path = Path(os.getenv("SystemDrive") + '/Program Files/NVIDIA Corporation/NVSMI')
+if os.name == 'nt':
+    smi_path = Path(os.getenv("SystemDrive") + '/Program Files/NVIDIA Corporation/NVSMI')
+elif os.name == 'posix':
+    smi_path = Path('')
 if settings_dict['nvidia_smi_path'] != 'default': smi_path = Path(settings_dict['nvidia_smi_path'])
 cmd_str = ' --query-gpu=driver_version,power.draw,power.limit,pcie.link.gen.current,temperature.gpu,\
 utilization.gpu,utilization.memory,memory.total,memory.free,memory.used --format=csv -l ' + str(update_freq_s)
 
 def run_checks():
-    if os.name != 'nt':
-        raise AssertionError("Sidelight only works on windows")
-    if smi_path.is_dir() != True:
-        raise AssertionError("Requires NVIDIA SMI. This should be installed by default if your GPU supports \
-                it and you have the latest graphics card drivers")
-    if (smi_path/'nvidia-smi.exe').is_file() != True:
-        raise AssertionError("NVIDIA SMI missing executable")
+    if os.name not in ['nt', 'posix']:
+        raise AssertionError("Sidelight only works on windows and ubuntu")
+    if os.name == 'nt':
+        if smi_path.is_dir() != True:
+            raise AssertionError("Requires NVIDIA SMI. This should be installed by default if your GPU supports \
+                    it and you have the latest graphics card drivers")
+        if (smi_path/'nvidia-smi.exe').is_file() != True:
+            raise AssertionError("NVIDIA SMI missing executable")
 
     return True
 
@@ -53,7 +56,7 @@ def place_root(root):
     root.geometry('%dx%d+%d+%d' % (w, 
                 h, 
                 int(settings_dict['main_screen_width'])+int(settings_dict['second_screen_width'])-w, 
-                second_height-h-40))
+                int(settings_dict['main_screen_height'])-h-52))
 
 def get_lbl_kwargs(bold=False, anchor=None, fsize=10):
     basic_kwargs = {
@@ -162,7 +165,11 @@ class Sidelight:
         self.root.attributes("-topmost", False)
         
     def start_subproc(self):
-        self.gpu_info_pipe = subprocess.Popen('"' + str(smi_path/'nvidia-smi.exe') + '"' + cmd_str, stdout=subprocess.PIPE, bufsize=1, close_fds=ON_POSIX, shell=True)
+        if os.name == 'nt':
+            self.gpu_info_pipe = subprocess.Popen('"' + str(smi_path/'nvidia-smi.exe') + '"' + cmd_str, stdout=subprocess.PIPE, bufsize=1, close_fds=ON_POSIX, shell=True)
+        elif os.name == 'posix':
+            self.gpu_info_pipe = subprocess.Popen('"' + 'nvidia-smi' + '"' + cmd_str, stdout=subprocess.PIPE, bufsize=1, close_fds=ON_POSIX, shell=True)
+
         self.t = threading.Thread(target=enqueue_output, args=(self.gpu_info_pipe.stdout, self.queue, lambda: self.running))
         self.t.daemon = True
         self.t.start()
@@ -239,7 +246,11 @@ def enqueue_output(out, queue, running):
 
 
 def run_smi_cmd(cmd_str):
-    s = subprocess.run(str(smi_path/'nvidia-smi.exe') + cmd_str, stdout=subprocess.PIPE)
+    if os.name == 'nt':
+        s = subprocess.run(str(smi_path/'nvidia-smi.exe') + cmd_str, stdout=subprocess.PIPE)
+    elif os.name == 'posix':
+        s = subprocess.run('nvidia-smi' + cmd_str, stdout=subprocess.PIPE, shell=True)
+
     return s.stdout.decode('utf-8')
 
 def _from_rgb(rgb):
