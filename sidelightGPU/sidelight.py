@@ -1,10 +1,12 @@
-import os, sys, time
+import os, io
 import signal
 import subprocess
+import sys
 import threading
+import time
+import tkinter as tk
 from pathlib import Path
 from queue import Empty, Queue
-import tkinter as tk
 from tkinter import END, Frame, Tk, mainloop, ttk
 
 from matplotlib import cm, colors
@@ -12,6 +14,9 @@ from matplotlib import cm, colors
 # Loading config
 ON_POSIX = 'posix' in sys.builtin_module_names
 sidelight_dir = os.path.dirname(os.path.abspath(__file__))
+
+# If we are on unix, import PIL
+if ON_POSIX: from PIL import Image, ImageTk
 
 with open(Path(sidelight_dir)/'settings.config', 'r') as file:
     lines = file.readlines()
@@ -45,18 +50,24 @@ def run_checks():
 def place_root(root):
     ws = root.winfo_screenwidth() # width of the screen
     hs = root.winfo_screenheight() # height of the screen
-    w = 205 # width for the Tk self.root
-    h = 270 # height for the Tk self.root
-    # print(ws, hs)
+
+    if os.name == 'nt': 
+        vert_offset = int(settings_dict['windows_taskbar_offset'])
+        w = 205 # width for the Tk self.root
+        h = 270 # height for the Tk self.root
+    elif os.name == 'posix': 
+        vert_offset = int(settings_dict['linux_taskbar_offset'])
+        w = 178 # width for the Tk self.root
+        h = 212 # height for the Tk self.root
     # x = (ws/2) - (w/2)
     # y = (hs/2) - (h/2)
+
     second_height = int(settings_dict['second_screen_height'])
     if second_height == 0:
         second_height = hs
-    root.geometry('%dx%d+%d+%d' % (w, 
-                h, 
+    root.geometry('%dx%d+%d+%d' % (w, h, 
                 int(settings_dict['main_screen_width'])+int(settings_dict['second_screen_width'])-w, 
-                int(settings_dict['main_screen_height'])-h-52))
+                int(settings_dict['main_screen_height'])-h-vert_offset))
 
 def get_lbl_kwargs(bold=False, anchor=None, fsize=10):
     basic_kwargs = {
@@ -73,27 +84,50 @@ class Sidelight:
     def __init__(self):
         ### Basic constructions
         self.root = Tk()
+    
         self.root.wm_title("Sidelight for Nvidia GPUs")
         self.running = True
         self.root.withdraw()
-        self.root.update()
+        if not ON_POSIX: self.root.update()
         self.root.deiconify()
         self.root.attributes("-topmost", True)
         self.root.configure(background='black')
         self.root.attributes('-alpha', float(settings_dict['alpha']))
-        self.root.overrideredirect(True)
+        
         self.root.protocol('WM_DELETE_WINDOW', self.close)
+        self.root.overrideredirect(1)
         place_root(self.root)
 
         ### Defining exit button
-        # print(sidelight_dir, Path(sidelight_dir)/'close.png')
-        im = tk.PhotoImage(file=Path(sidelight_dir)/'close.png')
-        button = tk.Button(self.root, image=im , command=lambda: self.close(), height=10, width=10, bg='black', borderwidth=0)
-        button.place(relx=1, x=-3, y=4, anchor=tk.NE)
-        def on_enter(e): button['bg'] = 'red'
-        def on_leave(e): button['bg'] = 'black'
+
+        if ON_POSIX: # Resize image if on linux
+            im_pil = Image.open(str(Path(sidelight_dir)/'close.png'))
+            im_pil = im_pil.resize((10, 10), Image.ANTIALIAS)
+            im_cross = ImageTk.PhotoImage(image=im_pil)
+        else: # Keep same image if on windows
+            im_cross = tk.PhotoImage(file=str(Path(sidelight_dir)/'close.png'))
+        button = tk.Button(self.root, image=im_cross, command=lambda: self.close(), height=10, width=10, \
+                            bg='black', borderwidth=0, highlightthickness=0, activebackground='red')
+        button.place(relx=1, x=-3, y=3, anchor=tk.NE)
+
+        def on_enter(e): 
+            button['bg'] = 'red'
+            self.root.attributes('-alpha', float(settings_dict['alpha']))
+        def on_leave(e): 
+            button['bg'] = 'black'
+            self.root.attributes('-alpha', float(settings_dict['alpha'])/2.8)
         button.bind("<Enter>", on_enter)
         button.bind("<Leave>", on_leave)
+
+        def root_enter(e):
+            if e.widget == self.root: # only consider root events
+                self.root.attributes('-alpha', float(settings_dict['alpha'])/2.8)
+
+        def root_leave(e):
+            if e.widget == self.root:
+                self.root.attributes('-alpha', float(settings_dict['alpha']))
+        self.root.bind("<Enter>", root_enter)
+        self.root.bind("<Leave>", root_leave)
 
         ######
         ## Defining text labels
@@ -157,6 +191,7 @@ class Sidelight:
         self.root.after(bring_to_front_delay*1000, self.bring_to_front)
         ### Final runtime updates
         self.root.update()
+        if ON_POSIX: self.root.attributes('-alpha', float(settings_dict['alpha']))
         self.root.mainloop()
 
     def bring_to_front(self):
